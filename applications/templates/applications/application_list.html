@@ -1,0 +1,88 @@
+{% extends 'applications/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Job Applications</h2>
+    <a href="{% url 'applications:application_create' %}" class="btn btn-success">+ Add Application</a>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+            <!-- Keyword Search -->
+            <div class="col-md-6">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ search_query }}" 
+                    class="form-control" 
+                    placeholder="Search by company or role..."
+                >
+            </div>
+
+            <!-- Status Dropdown Filter -->
+            <div class="col-md-4">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                {% if search_query or selected_status %}
+                    <a href="{% url 'applications:application_list' %}" class="btn btn-outline-secondary">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Applications Table -->
+{% if applications %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Applied Date</th>
+                    <th>Notes</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td class="fw-bold">{{ app.job_title }}</td>
+                    <td>{{ app.company_name }}</td>
+                    <td>
+                        <span class="badge bg-secondary">{{ app.get_status_display }}</span>
+                    </td>
+                    <td>{{ app.applied_date }}</td>
+                    <td class="text-muted small">{{ app.notes|default:"—" }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'applications:application_update' app.pk %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                        <a href="{% url 'applications:application_delete' app.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info py-4 text-center">
+    <h4>No matching job applications found!</h4>
+    <p class="mb-0">Try changing your search terms or status filter, or click <strong>+ Add Application</strong> to create one.</p>
+</div>
+{% endif %}
+{% endblock %}
